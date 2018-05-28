@@ -16,6 +16,7 @@ namespace OSPFv2_prototype
         private Dictionary<string, string> connections;
         private NetworkGraph netGraph;
         private List<int> packets;
+        public bool packetsCheck = false;
 
         public Node(string id)
         {
@@ -59,7 +60,10 @@ namespace OSPFv2_prototype
             node.AddNeighbor(this);
             netGraph.AddEdge(node.GetId());
             netGraph.SetLink(id, node.GetId(), weight);
-            ReceivePacket(GeneratePacket(node));
+            if (packetsCheck)
+                ReceiveNewPacket(GeneratePacket(node));
+            if (!packetsCheck)
+                ReceivePacket(GeneratePacket(node));
         }
 
         public void RemoveNode(Node node)
@@ -76,7 +80,7 @@ namespace OSPFv2_prototype
 
             if (dest.Equals(id))
             {
-                Console.WriteLine("Node: " + id + " received message: '" + text + "'\n\r");
+                Console.WriteLine("Node: " + id + " received message: '" + text);
             }
             else
             {
@@ -92,25 +96,6 @@ namespace OSPFv2_prototype
                 }
             }
         }
-
-        private Packet GeneratePacket(Node node)
-        {
-            NetworkGraph tempNet = node.GetNetwork();
-
-            foreach(var edge in tempNet.GetEdges())
-            {
-                netGraph.AddEdge(edge);
-
-                foreach(var neighbor in tempNet.GetNeighbors(edge))
-                {
-                    netGraph.AddEdge(neighbor);
-                    netGraph.SetLink(edge, neighbor, tempNet.GetWeight(edge, neighbor));
-                }
-            }
-
-            return new Packet(Packet.GetCounter(), id, netGraph);
-        }
-
         private void SendPacket (Packet packet)
         {
             foreach(var node in neighbors)
@@ -130,5 +115,43 @@ namespace OSPFv2_prototype
             }
         }
 
+        private Packet GeneratePacket(Node node)
+        {
+            NetworkGraph tempNet = node.GetNetwork();
+
+            foreach (var edge in tempNet.GetEdges())
+            {
+                netGraph.AddEdge(edge);
+
+                foreach (var neighbor in tempNet.GetNeighbors(edge))
+                {
+                    netGraph.AddEdge(neighbor);
+                    netGraph.SetLink(edge, neighbor, tempNet.GetWeight(edge, neighbor));
+                }
+            }
+
+            return new Packet(Packet.GetCounter(), id, netGraph);
+        }
+
+        public void ReceiveNewPacket(Packet packet)
+        {
+            if (!packets.Contains(packet.GetNumber()))
+            {
+                Console.WriteLine("Updated node " + id + " with packet " + packet.GetNumber());
+                packets.Add(packet.GetNumber());
+                netGraph = packet.GetNetwork();
+                connections = Dijkstra.DijkstraAlgorithm(netGraph, id);
+                Thread.Sleep(3000);
+                SendNewPacket(packet);
+            }
+        }
+
+        private void SendNewPacket(Packet packet)
+        {
+            foreach (var node in neighbors)
+            {
+                node.ReceiveNewPacket(packet);
+            }
+        }
     }
 }

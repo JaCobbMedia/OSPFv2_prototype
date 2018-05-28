@@ -11,14 +11,13 @@ namespace OSPFv2_prototype.Helpers
     {
         private static char seperator = ';';
 
-        // Dijkstra's algorithm to find shortest path from s to all other nodes
         public static Dictionary<string, string> DijkstraAlgorithm(NetworkGraph G, string source)
         {
             string[] routers = G.GetEdges();
             int[] dist = new int[routers.Length];
             string[] queue = new string[routers.Length];
             Dictionary<string, string> pred = new Dictionary<string, string>();
-            bool[] visited = new bool[routers.Length]; // all false initially
+            bool[] visited = new bool[routers.Length];
 
             for (int i = 0; i < dist.Length; i++)
             {

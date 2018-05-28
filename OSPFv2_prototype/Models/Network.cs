@@ -21,6 +21,11 @@ namespace OSPFv2_prototype
             nodes.Add(new Node(id));
         }
 
+        public List<Node> GetNodeList()
+        {
+            return nodes;
+        }
+
         public void RemoveNode(string id)
         {
             foreach(var node in nodes)
@@ -93,6 +98,25 @@ namespace OSPFv2_prototype
             }
 
             return 0;
+        }
+
+        public void AddNewLink(string src, string dest, int weight)
+        {
+            foreach (var node in nodes)
+            {
+                if (src.Equals(node.GetId()))
+                {
+                    foreach (var tempNode in nodes)
+                    {
+                        if (dest.Equals(tempNode.GetId()))
+                        {
+                            node.packetsCheck = true;
+                            Thread thread = new Thread(() => node.AddLink(tempNode, weight));
+                            thread.Start();
+                        }
+                    }
+                }
+            }
         }
     }
 }

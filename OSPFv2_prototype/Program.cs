@@ -43,7 +43,7 @@ namespace OSPFv2_prototype
                         string sNode = Console.ReadLine();
                         Console.WriteLine("Enter connection weight: ");
                         int weight = int.Parse(Console.ReadLine());
-                        network.AddLink(fNode, sNode, weight);
+                        network.AddNewLink(fNode, sNode, weight);
                         break;
                     case "4":
                         Console.WriteLine("Enter node's id: ");
@@ -90,7 +90,7 @@ namespace OSPFv2_prototype
                 {
                     string get;
                     connections.TryGetValue(key, out get);
-                    Console.WriteLine("Destinatin Node: " + key + " Sending to neighbor node: " + get + " with weight: " + network.GetWeight(node, get));
+                    Console.WriteLine("Destination Node: " + key + " Sending to neighbor node: " + get + " with weight: " + network.GetWeight(node, get));
                 }
             }
         }
